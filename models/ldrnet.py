@@ -28,9 +28,6 @@ class LDRNet(EfficientNetLite):
         self.use_feature_fusion = use_feature_fusion
         self.avgpool3d = torch.nn.AdaptiveAvgPool3d((320, 7,7))
 
-        if use_feature_fusion:
-            self.fusion = FeatureFusionModule([16, 24, 40, 80, 112, 192, 320], 320)
-
     def efficient_net_forward(self, x):
         x = self.backbone_model.stem(x)
         feature_maps = []
@@ -85,19 +82,3 @@ class LDRNet(EfficientNetLite):
         cls = self.classifier(x)
 
         return corners, line_points, cls
-
-class FeatureFusionModule(nn.Module):
-    def __init__(self, in_channels_list, out_channels):
-        super().__init__()
-        
-        self.convs = nn.ModuleList([nn.Conv2d(in_channels, out_channels, kernel_size=1) for in_channels in in_channels_list])
-
-    def forward(self, input_list):
-        adjusted_features = [conv(x) for conv, x in zip(self.convs, input_list)]
-        
-        target_size = max([x.shape[2:] for x in adjusted_features])
-        interpolated_features = [F.interpolate(x, size=target_size, mode='bilinear', align_corners=False) for x in adjusted_features]
-        
-        fused_features = sum(interpolated_features)
-        
-        return fused_features
