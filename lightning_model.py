@@ -13,7 +13,8 @@ class Lightning_LDRNet(pl.LightningModule):
                   drop_connect_rate = 0.2,
                   dropout_rate = 0.2,
                   lr = 3e-4,
-                  backbone_pretrained_path = None):
+                  backbone_pretrained_path = None,
+                  use_feature_fusion = False):
         
         super().__init__()
         self.lr = lr
@@ -23,7 +24,8 @@ class Lightning_LDRNet(pl.LightningModule):
                              depth_multiplier,
                              num_classes,
                              drop_connect_rate,
-                             dropout_rate)
+                             dropout_rate,
+                             use_feature_fusion)
 
         if backbone_pretrained_path:
             print(f"Loading efficientnetlite weights: {backbone_pretrained_path}")
@@ -105,5 +107,6 @@ class Lightning_LDRNet(pl.LightningModule):
 
 if __name__ == '__main__':
     x = torch.rand((1,3,224,224))
-    model = Lightning_LDRNet(100, 6, backbone_pretrained_path="weights/pretrained_weights/efficientnet_lite0.pth")
+    model = Lightning_LDRNet(100, 6, backbone_pretrained_path="weights/pretrained_weights/efficientnet_lite0.pth", use_feature_fusion = True)
+    a = input("Enter: ")
     print(model(x))
