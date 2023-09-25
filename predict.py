@@ -1,6 +1,6 @@
 import torch
 import os
-from models.model import LDRNet
+from lightning_model import Lightning_LDRNet
 import lightning as pl
 import torchvision.transforms as transforms
 import cv2 as cv
@@ -9,6 +9,7 @@ from tqdm import tqdm
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from data.augmentation import normal_transform
+from data.dataset import scale
 
 def load_image(image_path):
     path = image_path
@@ -21,13 +22,18 @@ def load_image(image_path):
     transformed_image = transformed["image"]
     return transformed_image, transformed_image.shape
 
-model = LDRNet(configs.n_points, lr = configs.lr)
+model = Lightning_LDRNet(configs.n_points, num_classes = configs.num_classes, lr = configs.lr, backbone_pretrained_path="weights/pretrained_weights/efficientnet_lite0.pth")
 # model = model.load_from_checkpoint("/notebooks/LDRNet/all/epoch=164-step=49995.ckpt")
-model = model.load_from_checkpoint("efficientnet_all/epoch=200-step=60903.ckpt")
+state_dict = torch.load("not_scaled/epoch=152-step=46359.ckpt", map_location = torch.device("cpu"))
+model.load_state_dict(state_dict["state_dict"])
+# model = model.cuda()
+
+# model = model.load_from_checkpoint("/notebooks/Lightning_LDRNet/efficientnet_all/epoch=175-step=53328.ckpt")
 model.eval()
 
-input_dir = "15_images_easy"
-output_dir = "output_images"
+input_dir = "/notebooks/LDRNet/test_data"
+output_dir = "output_images_new_scale"
+os.makedirs(output_dir, exist_ok = True)
 for f in tqdm(os.listdir(input_dir)):
     if not (f.endswith(".jpg") or f.endswith(".jpeg")):
         continue
@@ -35,8 +41,8 @@ for f in tqdm(os.listdir(input_dir)):
     print(image_path)
 
     image, _ = load_image(image_path)
-    image = image.cuda()
-    corners, points = model(image.unsqueeze(0))
+    # image = image.cuda()
+    corners, points,_ = model(image.unsqueeze(0))
     
     output_image_path = output_dir + "/" + f
     
@@ -44,17 +50,16 @@ for f in tqdm(os.listdir(input_dir)):
     img = cv.resize(img, (int(img.shape[1]/2),int(img.shape[0]/2)))
     corners = corners[0].detach().cpu().numpy()
     points = points[0].detach().cpu().numpy()
-    x = corners[0::2] * img.shape[1]
-    y = corners[1::2] * img.shape[0]
+    x = corners[0::2]# * img.shape[1]
+    y = corners[1::2]# * img.shape[0]
     
     colors = [(0,0,255), (0,255,0), (255,0,0), (255,0,255)]
     for i in range(0,4):
         # s = (int(corners[i % 4][0]*img.shape[1]), int(corners[i % 4][1]*img.shape[0]))
         # e = (int(corners[(i+1) % 4][0]*img.shape[1]), int(corners[(i+1) % 4][1]*img.shape[0]))
         next_id = (i+1)%4
-        img = cv.line(img, (round(x[i]), round(y[i])), (round(x[next_id]), round(y[next_id])), (0,0,255), 2)
-        # img = cv.circle(img, (int(a),int(b)), 3, colors[i], 2)
-    # for i in range(0,len(points),2):
-    #     img = cv.circle(img, (round(points[i]*img.shape[1]), round(points[i+1]*img.shape[0])), 4, (0,255,0), 1)
-        
+        # img = cv.line(img, (round(scale(x[i], -1, 1, img.shape[1]*-1, img.shape[1]*2)), round(scale(y[i], -1, 1, img.shape[0]*-1, img.shape[0]*2))), (round(scale(x[next_id], -1, 1, img.shape[1]*-1, img.shape[1]*2)), round(scale(y[next_id], -1, 1, img.shape[0]*-1, img.shape[0]*2))), (0,0,255), 2)
+        # img = cv.line(img, (round(x[i]), round(y[i])), (round(x[next_id]), round(y[next_id])), (0,0,255), 2)
+        img = cv.line(img, (round(scale(x[i], -224, 448, img.shape[1]*-1, img.shape[1]*2)), round(scale(y[i], -224, 448, img.shape[0]*-1, img.shape[0]*2))), (round(scale(x[next_id], -224, 448, img.shape[1]*-1, img.shape[1]*2)), round(scale(y[next_id], -224, 448, img.shape[0]*-1, img.shape[0]*2))), (0,0,255), 2)
+
     cv.imwrite(output_image_path+".jpg", img)

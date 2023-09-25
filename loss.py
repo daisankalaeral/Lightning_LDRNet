@@ -58,7 +58,6 @@ def calculate_total_loss(corner_coords_true, corner_coords_pred, border_coords_p
     line_loss = calculate_line_loss(y_pred)
 
     cls_loss = F.cross_entropy(cls_pred, cls_true, reduction = "none")
-
     
     total_loss = torch.mean(configs.reg_ratio * mean_reg_loss + line_loss + cls_loss)
     

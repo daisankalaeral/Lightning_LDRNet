@@ -18,8 +18,8 @@ from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 torch.set_float32_matmul_precision("medium") # to make lightning happy
 
 if __name__ == "__main__":
-    logger = TensorBoardLogger("efficientnet_all", name = "logs")
-    checkpoint_callback = ModelCheckpoint(dirpath="efficientnet_all", save_top_k=3, monitor="val_loss", save_last = True)
+    logger = TensorBoardLogger("not_scaled", name = "logs")
+    checkpoint_callback = ModelCheckpoint(dirpath="not_scaled", save_top_k=1, monitor="val_loss", save_last = True)
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=50)
   
     trainer = pl.Trainer(
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     model = Lightning_LDRNet(configs.n_points, configs.num_classes, lr = configs.lr, backbone_pretrained_path="weights/pretrained_weights/efficientnet_lite0.pth")
     
     dm = DocDataModule(
-        train_json_path="/notebooks/LDRNet_dataset/ldrnet_train.json",
-        valid_json_path="/notebooks/LDRNet_dataset/ldrnet_valid.json",
+        train_json_path="/notebooks/LDRNet_dataset/train_with_class.json",
+        valid_json_path="/notebooks/LDRNet_dataset/valid_with_class.json",
         data_dir="/notebooks/LDRNet_dataset",
         batch_size=configs.batch_size,
         num_workers=configs.num_workers
@@ -54,4 +54,4 @@ if __name__ == "__main__":
         lr_finder = tuner.lr_find(model, dm, num_training = 500)
     
     model.tuning = False
-    trainer.fit(model, dm) # ckpt_path="some/path/to/my_checkpoint.ckpt"
+    trainer.fit(model, dm, ckpt_path="not_scaled/last-v2.ckpt") # ckpt_path="some/path/to/my_checkpoint.ckpt"

@@ -1,9 +1,9 @@
 n_points = 100
 if n_points > 4:
     size_per_border = int((n_points-4)/4)
-num_classes = 4
+num_classes = 6
 
-reg_ratio = 50
+reg_ratio = 0.001 # 0.001 when not scaled
 beta = 0.01
 gamma = 0.01
 
