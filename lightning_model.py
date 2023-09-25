@@ -109,4 +109,5 @@ if __name__ == '__main__':
     x = torch.rand((1,3,224,224))
     model = Lightning_LDRNet(100, 6, backbone_pretrained_path="weights/pretrained_weights/efficientnet_lite0.pth", use_feature_fusion = True)
     a = input("Enter: ")
-    print(model(x))
+    print(model)
+    out = model(x)

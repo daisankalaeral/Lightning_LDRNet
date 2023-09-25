@@ -26,6 +26,7 @@ class LDRNet(EfficientNetLite):
         self.line = nn.Linear(1280, (n_points - 4) * 2)
         self.classifier = nn.Linear(1280, num_classes)
         self.use_feature_fusion = use_feature_fusion
+        self.avgpool3d = torch.nn.AdaptiveAvgPool3d((320, 7,7))
 
         if use_feature_fusion:
             self.fusion = FeatureFusionModule([16, 24, 40, 80, 112, 192, 320], 320)
@@ -65,12 +66,14 @@ class LDRNet(EfficientNetLite):
                     drop_connect_rate *= float(idx) / len(self.blocks)
                 x = block(x, drop_connect_rate)
                 idx +=1
+
             if self.use_feature_fusion:
                 feature_maps.append(x)
 
         if self.use_feature_fusion:
-            x = self.fusion(feature_maps)
-        
+            fused = [self.avgpool3d(feature_map.unsqueeze(1)).squeeze(1) for feature_map in feature_maps]
+            x = sum(fused)
+
         x = self.head(x)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
