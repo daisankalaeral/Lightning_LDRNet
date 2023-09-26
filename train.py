@@ -18,8 +18,8 @@ from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 torch.set_float32_matmul_precision("medium") # to make lightning happy
 
 if __name__ == "__main__":
-    logger = TensorBoardLogger("lite2", name = "logs")
-    checkpoint_callback = ModelCheckpoint(dirpath="lite2", save_top_k=1, monitor="val_loss", save_last = True)
+    logger = TensorBoardLogger(configs.output_dir, name = "logs")
+    checkpoint_callback = ModelCheckpoint(dirpath=configs.output_dir, save_top_k=1, monitor="val_loss", save_last = True)
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=50)
   
     trainer = pl.Trainer(
@@ -46,7 +46,7 @@ if __name__ == "__main__":
                       drop_connect_rate = 0.2,
                       dropout_rate = 0.2,
                       lr = configs.lr,
-                      backbone_pretrained_path = "weights/pretrained_weights/efficientnet_lite2.pth",
+                      backbone_pretrained_path = configs.backbone_pretrained_path,
                       use_feature_fusion = False)
     
     dm = DocDataModule(
