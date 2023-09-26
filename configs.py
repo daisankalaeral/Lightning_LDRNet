@@ -1,4 +1,5 @@
 output_dir = "results"
+backbone_pretrained_path = "weights/pretrained_weights/efficientnet_lite0.pth"
 
 n_points = 100
 if n_points > 4:
