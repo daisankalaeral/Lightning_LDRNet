@@ -1,3 +1,5 @@
+output_dir = "results"
+
 n_points = 100
 if n_points > 4:
     size_per_border = int((n_points-4)/4)
