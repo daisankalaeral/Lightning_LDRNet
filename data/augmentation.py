@@ -23,7 +23,7 @@ keypoint_params=A.KeypointParams(format='xy', remove_invisible=False)
 augment = A.Compose([
     A.Perspective(p=0.2),
     A.ShiftScaleRotate (rotate_limit = 180, p=0.3),
-    A.Resize(224,224),
+    A.Resize(260,260),
     A.HorizontalFlip(p=0.3),
     A.RandomSunFlare(src_radius=30,p=0.3),
     # A.RandomShadow(shadow_roi=(0, 0, 1, 1), p=0.4),
@@ -42,7 +42,7 @@ augment = A.Compose([
 ], keypoint_params=keypoint_params)
 
 normal_transform = A.Compose([
-    A.Resize(224,224),
+    A.Resize(260,260),
     # A.Equalize(p=1),
     A.Normalize(mean=m, std=std),
     ToTensorV2(),

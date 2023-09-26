@@ -29,8 +29,8 @@ def rearrange_points(l):
     l[:2] = sorted(l[:2], key = lambda c: c[0])
     l[2:4] = sorted(l[2:4], key = lambda c: c[0], reverse = True)
     
-    # output = [scale(x, -224, 448, -1, 1) for sublist in l for x in sublist]
-    output = [x for sublist in l for x in sublist]
+    output = [scale(x, -260, 520, -1, 1) for sublist in l for x in sublist]
+    # output = [x for sublist in l for x in sublist]
     
     return output    
 
