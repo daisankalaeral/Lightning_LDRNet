@@ -46,7 +46,7 @@ if __name__ == "__main__":
                       drop_connect_rate = 0.2,
                       dropout_rate = 0.2,
                       lr = configs.lr,
-                      backbone_pretrained_path = "weights/pretrained_weights/efficientnet_lite2.pth",
+                      backbone_pretrained_path = configs.backbone_pretrained_path,
                       use_feature_fusion = False)
     
     dm = DocDataModule(
